@@ -36,5 +36,8 @@ jobs:
       - name: Build package
         run: pnpm prepack
 
+      - name: Verify committed package output
+        run: git diff --exit-code -- dist
+
       - name: Build playground
         run: pnpm dev:build
