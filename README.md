@@ -141,7 +141,7 @@ pnpm dev:prepare
 pnpm lint
 pnpm typecheck
 pnpm test
-pnpm prepack
+pnpm build
 pnpm dev:build
 ```
 
