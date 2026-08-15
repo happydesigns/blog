@@ -20,7 +20,6 @@ export type {
   NormalizedBlogConfig,
   NormalizedBlogSection,
 } from './core'
-export { defineBlogConfig } from './core'
 
 function toVueRouterPath(path: string): string {
   return path
