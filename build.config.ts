@@ -7,6 +7,7 @@ export default defineBuildConfig({
   ],
   declaration: true,
   rollup: {
+    commonjs: false,
     emitCJS: false,
   },
 })
