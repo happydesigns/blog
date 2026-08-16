@@ -8,7 +8,9 @@ describe('Nuxt module runtime', async () => {
   })
 
   it('renders independent Blog and News sections', async () => {
-    expect(await $fetch('/blog')).toContain('Blog')
+    const blog = await $fetch<string>('/blog')
+    expect(blog).toContain('Blog')
+    expect(blog).toContain('/fixture-preview.svg')
     expect(await $fetch('/blog/hello')).toContain('Hello Blog')
     expect(await $fetch('/news')).toContain('News')
     expect(await $fetch('/news/release')).toContain('News Release')

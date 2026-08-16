@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   orientation: 'horizontal',
   showCategories: true,
+  showPreviewImages: undefined,
 })
 
 const { section } = useBlogSection(() => props.section)
@@ -67,7 +68,6 @@ watch(page, () => {
     <UNavigationMenu
       v-if="showCategories && !category && Object.keys(taxonomyCategories).length > 0"
       :items="categories"
-      class="border-b border-default"
       highlight
     />
 

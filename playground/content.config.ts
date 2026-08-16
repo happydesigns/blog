@@ -23,6 +23,11 @@ export default defineContentConfig({
         username: z.string(),
         name: z.string(),
         description: z.string().optional(),
+        to: z.string().optional(),
+        avatar: z.object({
+          src: z.string(),
+          alt: z.string().optional(),
+        }).optional(),
       }),
     }),
   },

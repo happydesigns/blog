@@ -1,6 +1,7 @@
 import blog from './blog.config'
 
 export default defineNuxtConfig({
+  extends: ['@happydesigns/ui'],
   modules: [
     ['@happydesigns/blog', blog],
   ],

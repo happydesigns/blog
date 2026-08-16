@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title">
+  <title id="title">Editorial workflow</title>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#082f49"/><stop offset="1" stop-color="#172554"/></linearGradient></defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <path d="M180 350 C330 170 475 500 620 315 S900 170 1020 325" fill="none" stroke="#38bdf8" stroke-width="24" stroke-linecap="round" opacity=".35"/>
+  <g font-family="system-ui,sans-serif" font-weight="700" text-anchor="middle">
+    <g transform="translate(220 330)"><circle r="92" fill="#e0f2fe"/><circle r="62" fill="#38bdf8"/><text y="9" font-size="26" fill="#082f49">Draft</text></g>
+    <g transform="translate(600 315)"><circle r="92" fill="#dbeafe"/><circle r="62" fill="#60a5fa"/><text y="9" font-size="25" fill="#172554">Review</text></g>
+    <g transform="translate(980 310)"><circle r="92" fill="#dcfce7"/><circle r="62" fill="#4ade80"/><text y="9" font-size="24" fill="#052e16">Publish</text></g>
+  </g>
+</svg>
