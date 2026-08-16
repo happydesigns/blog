@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "@happydesigns/ui/styles.css";
 
 :root {
   --ui-container: 74rem;
