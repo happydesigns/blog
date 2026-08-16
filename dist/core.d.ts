@@ -115,12 +115,19 @@ interface BlogPublication {
     };
     [key: string]: unknown;
 }
+interface BlogPaginationResult<T> {
+    items: T[];
+    page: number;
+    pageCount: number;
+    total: number;
+}
 declare function defineBlogConfig<const T extends BlogModuleOptions>(config: T): T;
 declare function normalizeBasePath(path: string): string;
 declare function normalizeBlogConfig(options?: BlogModuleOptions): NormalizedBlogConfig;
 declare function isBlogPostVisible(post: BlogPublication, now?: Date): boolean;
 declare function getBlogPostCategories(post: BlogPublication): string[];
+declare function paginateBlogItems<T>(items: T[], requestedPage: number, requestedItemsPerPage: number): BlogPaginationResult<T>;
 declare function joinBlogUrl(base: string, path: string): string;
 
-export { defineBlogConfig, getBlogPostCategories, isBlogPostVisible, joinBlogUrl, normalizeBasePath, normalizeBlogConfig };
-export type { BlogAuthorOptions, BlogCategoryOptions, BlogFeedOptions, BlogLabels, BlogListFeatureOptions, BlogModuleOptions, BlogPublication, BlogPublicationStatus, BlogSectionFeatures, BlogSectionOptions, BlogSectionRoutes, BlogSortDirection, BlogTaxonomyFeatureOptions, NormalizedBlogConfig, NormalizedBlogSection };
+export { defineBlogConfig, getBlogPostCategories, isBlogPostVisible, joinBlogUrl, normalizeBasePath, normalizeBlogConfig, paginateBlogItems };
+export type { BlogAuthorOptions, BlogCategoryOptions, BlogFeedOptions, BlogLabels, BlogListFeatureOptions, BlogModuleOptions, BlogPaginationResult, BlogPublication, BlogPublicationStatus, BlogSectionFeatures, BlogSectionOptions, BlogSectionRoutes, BlogSortDirection, BlogTaxonomyFeatureOptions, NormalizedBlogConfig, NormalizedBlogSection };

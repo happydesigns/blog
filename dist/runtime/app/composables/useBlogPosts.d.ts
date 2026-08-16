@@ -29,8 +29,12 @@ export declare function resolveBlogAuthors(posts: BlogPostDocument[], collection
 }>>;
 export declare function useBlogPosts(options?: UseBlogPostsOptions): import("#app").AsyncData<{
     posts: ResolvedBlogPost[];
+    page: number;
+    pageCount: number;
     total: number;
 } | {
     posts: ResolvedBlogPost[];
+    page: number;
+    pageCount: number;
     total: number;
 }, import("#app").NuxtError<unknown> | undefined>;

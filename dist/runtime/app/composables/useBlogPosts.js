@@ -1,6 +1,6 @@
 import { computed, toValue } from "vue";
 import { queryCollection, useAsyncData } from "#imports";
-import { getBlogPostCategories, isBlogPostVisible } from "../../../core";
+import { getBlogPostCategories, isBlogPostVisible, paginateBlogItems } from "../../../core";
 import { useBlogSection } from "./useBlogSection.js";
 export async function resolveBlogAuthors(posts, collection) {
   if (!collection)
@@ -30,14 +30,31 @@ export function useBlogPosts(options = {}) {
   ].join(":"));
   return useAsyncData(asyncKey, async () => {
     const currentSection = section.value;
-    let query = queryCollection(currentSection.collection);
-    query = query.where("published", "=", true);
-    query = query.order(currentSection.sort.field, currentSection.sort.direction);
-    const visiblePosts = (await query.all()).filter((post) => isBlogPostVisible(post)).filter((post) => !category.value || getBlogPostCategories(post).includes(category.value)).filter((post) => !tag.value || post.tags?.includes(tag.value)).filter((post) => !author.value || post.authors?.includes(author.value));
-    const start = (page.value - 1) * itemsPerPage.value;
-    const paginated = visiblePosts.slice(start, start + itemsPerPage.value);
-    const authors = await resolveBlogAuthors(paginated, currentSection.features.authors && currentSection.features.authors.collection);
-    const posts = paginated.map((post) => {
+    const indexFields = [.../* @__PURE__ */ new Set([
+      "path",
+      "published",
+      "status",
+      "publishedAt",
+      "category",
+      "categories",
+      "tags",
+      "authors",
+      currentSection.sort.field
+    ])];
+    let indexQuery = queryCollection(currentSection.collection);
+    indexQuery = indexQuery.where("published", "=", true);
+    indexQuery = indexQuery.order(currentSection.sort.field, currentSection.sort.direction);
+    const visiblePosts = (await indexQuery.select(...indexFields).all()).filter((post) => isBlogPostVisible(post)).filter((post) => !category.value || getBlogPostCategories(post).includes(category.value)).filter((post) => !tag.value || post.tags?.includes(tag.value)).filter((post) => !author.value || post.authors?.includes(author.value));
+    const pagination = paginateBlogItems(visiblePosts, page.value, itemsPerPage.value);
+    const selectedPaths = pagination.items.map((post) => post.path);
+    const pageDocuments = selectedPaths.length > 0 ? await queryCollection(currentSection.collection).where("path", "IN", selectedPaths).all() : [];
+    const documentsByPath = new Map(pageDocuments.map((post) => [post.path, post]));
+    const paginatedPosts = selectedPaths.flatMap((path) => {
+      const post = documentsByPath.get(path);
+      return post ? [post] : [];
+    });
+    const authors = await resolveBlogAuthors(paginatedPosts, currentSection.features.authors && currentSection.features.authors.collection);
+    const posts = paginatedPosts.map((post) => {
       const categoryKey = currentSection.features.taxonomy ? getBlogPostCategories(post)[0] : void 0;
       const categoryOptions = categoryKey && currentSection.features.taxonomy ? currentSection.features.taxonomy.categories[categoryKey] : void 0;
       return {
@@ -53,9 +70,14 @@ export function useBlogPosts(options = {}) {
         })
       };
     });
-    return { posts, total: visiblePosts.length };
+    return {
+      posts,
+      page: pagination.page,
+      pageCount: pagination.pageCount,
+      total: pagination.total
+    };
   }, {
     lazy: toValue(options.lazy) ?? false,
-    default: () => ({ posts: [], total: 0 })
+    default: () => ({ posts: [], page: 1, pageCount: 0, total: 0 })
   });
 }

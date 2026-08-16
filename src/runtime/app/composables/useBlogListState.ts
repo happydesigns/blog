@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
 import { ref, watch } from 'vue'
 import { navigateTo, useRoute } from '#imports'
+import { buildBlogListQuery, readBlogPage, readBlogQueryValue } from '../utils/blogListQuery'
 
 export interface UseBlogListStateOptions {
   allLabel: Ref<string>
@@ -9,9 +10,8 @@ export interface UseBlogListStateOptions {
 
 export function useBlogListState({ allLabel, fixedCategory }: UseBlogListStateOptions) {
   const route = useRoute()
-  const routeCategory = () => Array.isArray(route.query.category) ? route.query.category[0] : route.query.category
-  const routePage = () => Array.isArray(route.query.page) ? route.query.page[0] : route.query.page
-  const page = ref(Math.max(1, Number(routePage()) || 1))
+  const routeCategory = () => readBlogQueryValue(route.query.category)
+  const page = ref(readBlogPage(route.query.page))
   const selectedCategory = ref(fixedCategory?.value ?? routeCategory() ?? allLabel.value)
 
   watch(() => fixedCategory?.value, (value) => {
@@ -20,27 +20,24 @@ export function useBlogListState({ allLabel, fixedCategory }: UseBlogListStateOp
   })
 
   watch(() => route.query, () => {
-    page.value = Math.max(1, Number(routePage()) || 1)
+    page.value = readBlogPage(route.query.page)
     if (!fixedCategory?.value)
       selectedCategory.value = routeCategory() ?? allLabel.value
   })
 
-  async function updateQuery({ resetPage = false } = {}) {
-    const query = { ...route.query }
-    if (resetPage || page.value === 1)
-      delete query.page
-    else
-      query.page = String(page.value)
-
-    if (!fixedCategory?.value) {
-      if (selectedCategory.value === allLabel.value)
-        delete query.category
-      else
-        query.category = selectedCategory.value
-    }
-
-    await navigateTo({ query })
+  function queryForPage(targetPage: number, { resetPage = false } = {}) {
+    return buildBlogListQuery(route.query, {
+      page: targetPage,
+      selectedCategory: selectedCategory.value,
+      allLabel: allLabel.value,
+      fixedCategory: fixedCategory?.value,
+      resetPage,
+    })
   }
 
-  return { page, selectedCategory, updateQuery }
+  async function updateQuery({ resetPage = false, replace = false } = {}) {
+    await navigateTo({ query: queryForPage(page.value, { resetPage }) }, { replace })
+  }
+
+  return { page, selectedCategory, queryForPage, updateQuery }
 }

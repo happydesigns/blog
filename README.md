@@ -155,6 +155,14 @@ defineBlogConfig({
 Module pages are optional. Custom pages can use the auto-imported
 `HBlogList`, `HBlogPostPage`, `useBlogPosts`, and `useBlogPost` APIs.
 
+### List pagination
+
+Set `itemsPerPage` on a section to define its default page size. `HBlogList`
+keeps the current page in the `page` query parameter, resets it when the
+category changes, and clamps stale or invalid pages to the available range.
+Individual lists can override `itemsPerPage` or hide the controls with
+`showPagination="false"`, which is useful for a short latest-posts preview.
+
 ## Publication rules
 
 The schema preserves the established `published` Boolean and adds an optional

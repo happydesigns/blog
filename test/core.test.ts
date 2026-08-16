@@ -4,6 +4,7 @@ import {
   getBlogPostCategories,
   isBlogPostVisible,
   normalizeBlogConfig,
+  paginateBlogItems,
 } from '../src/core'
 
 describe('publication visibility', () => {
@@ -20,6 +21,25 @@ describe('publication visibility', () => {
     expect(isBlogPostVisible({ published: true, status: 'scheduled', publishedAt: '2026-08-15T13:00:00Z' }, now)).toBe(false)
     expect(isBlogPostVisible({ published: true, status: 'scheduled' }, now)).toBe(false)
     expect(isBlogPostVisible({ published: true, status: 'published', publishedAt: '2026-08-15T13:00:00Z' }, now)).toBe(false)
+  })
+})
+
+describe('pagination', () => {
+  const items = ['first', 'second', 'third', 'fourth', 'fifth']
+
+  it('returns the requested page and total metadata', () => {
+    expect(paginateBlogItems(items, 2, 2)).toEqual({
+      items: ['third', 'fourth'],
+      page: 2,
+      pageCount: 3,
+      total: 5,
+    })
+  })
+
+  it('clamps invalid and out-of-range pages', () => {
+    expect(paginateBlogItems(items, 99, 2)).toMatchObject({ items: ['fifth'], page: 3 })
+    expect(paginateBlogItems(items, Number.NaN, 2)).toMatchObject({ items: ['first', 'second'], page: 1 })
+    expect(paginateBlogItems([], 99, 2)).toEqual({ items: [], page: 1, pageCount: 0, total: 0 })
   })
 })
 

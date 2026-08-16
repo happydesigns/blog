@@ -11,11 +11,12 @@ const props = defineProps({
   orientation: { type: String, required: false, default: "horizontal" },
   itemsPerPage: { type: Number, required: false },
   showCategories: { type: Boolean, required: false, default: true },
+  showPagination: { type: Boolean, required: false, default: true },
   showPreviewImages: { type: Boolean, required: false, default: void 0 }
 });
 const { section } = useBlogSection(() => props.section);
 const allLabel = computed(() => section.value.labels.all);
-const { page, selectedCategory, updateQuery } = useBlogListState({
+const { page, selectedCategory, queryForPage, updateQuery } = useBlogListState({
   allLabel,
   fixedCategory: computed(() => props.category)
 });
@@ -31,6 +32,18 @@ const { data, status } = await useBlogPosts({
   tag: () => props.tag,
   author: () => props.author
 });
+let correctingPage = false;
+watch(() => data.value.page, async (validPage) => {
+  if (!import.meta.client || validPage === page.value)
+    return;
+  correctingPage = true;
+  try {
+    page.value = validPage;
+    await updateQuery({ replace: true });
+  } finally {
+    correctingPage = false;
+  }
+}, { immediate: true });
 const categories = computed(() => [
   { label: allLabel.value, value: allLabel.value },
   ...Object.entries(taxonomyCategories.value).map(([value, options]) => ({
@@ -46,6 +59,8 @@ const categories = computed(() => [
   }
 })));
 watch(page, () => {
+  if (correctingPage)
+    return;
   void updateQuery();
   if (import.meta.client)
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -126,13 +141,14 @@ watch(page, () => {
     </div>
 
     <div
-      v-if="data.total > itemsPerPage"
+      v-if="showPagination && data.pageCount > 1"
       class="flex justify-center"
     >
       <UPagination
         v-model:page="page"
         :total="data.total"
         :items-per-page="itemsPerPage"
+        :to="(targetPage) => ({ query: queryForPage(targetPage) })"
       />
     </div>
   </div>

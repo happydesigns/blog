@@ -6,6 +6,7 @@ export default defineBlogConfig({
       collection: 'article',
       basePath: '/blog',
       title: 'Blog',
+      itemsPerPage: 1,
       features: {
         taxonomy: { categories: { General: { color: 'primary' } } },
       },

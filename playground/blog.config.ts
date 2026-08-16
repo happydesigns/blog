@@ -21,7 +21,7 @@ export default defineBlogConfig({
           },
         },
       },
-      itemsPerPage: 6,
+      itemsPerPage: 3,
     },
     news: {
       collection: 'news',
