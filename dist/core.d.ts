@@ -38,6 +38,7 @@ interface BlogSectionOptions {
     description?: string;
     locale?: string;
     itemsPerPage?: number;
+    showPreviewImages?: boolean;
     sort?: {
         field?: string;
         direction?: BlogSortDirection;
@@ -59,6 +60,7 @@ interface NormalizedBlogSection {
     description?: string;
     locale: string;
     itemsPerPage: number;
+    showPreviewImages: boolean;
     sort: {
         field: string;
         direction: BlogSortDirection;

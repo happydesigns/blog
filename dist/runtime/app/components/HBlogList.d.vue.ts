@@ -6,6 +6,7 @@ type __VLS_Props = {
     orientation?: 'horizontal' | 'vertical';
     itemsPerPage?: number;
     showCategories?: boolean;
+    showPreviewImages?: boolean;
 };
 declare var __VLS_17: {
     key: string;
