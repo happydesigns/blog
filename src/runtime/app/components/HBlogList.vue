@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   orientation: 'horizontal',
   showCategories: true,
+  showPreviewImages: undefined,
 })
 
 const { section } = useBlogSection(() => props.section)

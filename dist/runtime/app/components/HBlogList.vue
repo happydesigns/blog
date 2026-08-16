@@ -11,7 +11,7 @@ const props = defineProps({
   orientation: { type: String, required: false, default: "horizontal" },
   itemsPerPage: { type: Number, required: false },
   showCategories: { type: Boolean, required: false, default: true },
-  showPreviewImages: { type: Boolean, required: false }
+  showPreviewImages: { type: Boolean, required: false, default: void 0 }
 });
 const { section } = useBlogSection(() => props.section);
 const allLabel = computed(() => section.value.labels.all);
