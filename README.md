@@ -30,7 +30,16 @@ export default defineBlogConfig({
       collection: 'article',
       basePath: '/blog',
       title: 'Blog',
-      showPreviewImages: true,
+      features: {
+        list: { previewImages: true },
+        authors: { collection: 'user' },
+        taxonomy: {
+          categories: {
+            News: { label: 'News', color: 'primary' },
+          },
+        },
+        syndication: { rss: '/blog/rss.xml', atom: false },
+      },
     },
     news: {
       collection: 'news',
@@ -82,6 +91,31 @@ export default defineContentConfig({
 `defineBlogCollection` is also exported for applications that prefer to define
 one collection at a time.
 
+### Compose schemas with Nuxt Variants
+
+Blog provides publication behavior, while the consuming application remains
+free to compose layout features and their fields through Nuxt Variants. Pass
+that resolved object schema as `baseSchema`; Blog adds only its publication
+contract and any project extension on top:
+
+```ts
+import { articleSchema } from './content/variants'
+
+defineBlogCollections(blog, {
+  blog: {
+    source: 'blog/**/*.{md,yaml}',
+    baseSchema: articleSchema,
+    schema: {
+      campaign: z.string().optional(),
+    },
+  },
+})
+```
+
+This keeps the Nuxt Variants graph authoritative for shared page features and
+lets Blog remain an installable preset for queries, routes, syndication, and a
+default Nuxt UI experience.
+
 ## Defaults and routes
 
 Every section receives these default routes below its `basePath`:
@@ -107,9 +141,11 @@ defineBlogConfig({
         index: false,
         post: '/blog/article/[...slug]',
       },
-      feed: {
-        rss: '/blog/rss.xml',
-        atom: false,
+      features: {
+        syndication: {
+          rss: '/blog/rss.xml',
+          atom: false,
+        },
       },
     },
   },

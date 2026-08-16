@@ -17,19 +17,19 @@ function publicationDate(post) {
 function findSection(event, path) {
   const config = useRuntimeConfig(event).public.happydesignsBlog;
   for (const section of Object.values(config.sections)) {
-    if (!section.feed)
+    if (!section.features.syndication)
       continue;
-    if (section.feed.rss === path)
+    if (section.features.syndication.rss === path)
       return { section, format: "rss" };
-    if (section.feed.atom === path)
+    if (section.features.syndication.atom === path)
       return { section, format: "atom" };
   }
   throw createError({ statusCode: 404, statusMessage: "Feed not found" });
 }
 function renderRss(section, posts, siteUrl) {
-  if (!section.feed)
+  if (!section.features.syndication)
     throw new Error(`[happydesigns/blog] Section "${section.key}" has no feed configuration.`);
-  const feed = section.feed;
+  const feed = section.features.syndication;
   const feedUrl = joinBlogUrl(siteUrl, feed.rss || section.basePath);
   const feedTitle = feed.title || section.title;
   const feedDescription = feed.description || section.description || section.title;
@@ -58,9 +58,9 @@ function renderRss(section, posts, siteUrl) {
 </rss>`;
 }
 function renderAtom(section, posts, siteUrl) {
-  if (!section.feed)
+  if (!section.features.syndication)
     throw new Error(`[happydesigns/blog] Section "${section.key}" has no feed configuration.`);
-  const feed = section.feed;
+  const feed = section.features.syndication;
   const feedUrl = joinBlogUrl(siteUrl, feed.atom || section.basePath);
   const feedTitle = feed.title || section.title;
   const updated = posts[0] ? publicationDate(posts[0]).toISOString() : (/* @__PURE__ */ new Date()).toISOString();
@@ -86,7 +86,7 @@ function renderAtom(section, posts, siteUrl) {
 export default defineEventHandler(async (event) => {
   const requestUrl = getRequestURL(event);
   const { section, format } = findSection(event, requestUrl.pathname);
-  const siteUrl = section.feed && section.feed.siteUrl ? section.feed.siteUrl : requestUrl.origin;
+  const siteUrl = section.features.syndication && section.features.syndication.siteUrl ? section.features.syndication.siteUrl : requestUrl.origin;
   const query = queryCollection(event, section.collection);
   const posts = (await query.where("published", "=", true).order(section.sort.field, section.sort.direction).all()).filter((post) => isBlogPostVisible(post));
   if (format === "rss") {

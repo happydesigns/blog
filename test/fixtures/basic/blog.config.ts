@@ -6,13 +6,15 @@ export default defineBlogConfig({
       collection: 'article',
       basePath: '/blog',
       title: 'Blog',
-      categories: { General: { color: 'primary' } },
+      features: {
+        taxonomy: { categories: { General: { color: 'primary' } } },
+      },
     },
     news: {
       collection: 'news',
       basePath: '/news',
       title: 'News',
-      feed: false,
+      features: { syndication: false },
     },
   },
 })

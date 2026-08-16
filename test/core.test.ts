@@ -28,25 +28,46 @@ describe('section configuration', () => {
     const config = normalizeBlogConfig(defineBlogConfig({
       sections: {
         blog: { collection: 'article', basePath: '/blog' },
-        news: { collection: 'news', basePath: '/news', feed: false },
+        news: { collection: 'news', basePath: '/news', features: { syndication: false } },
       },
     }))
 
     expect(config.sections.blog?.routes.post).toBe('/blog/[...slug]')
-    expect(config.sections.blog?.showPreviewImages).toBe(true)
-    expect(config.sections.blog?.feed && config.sections.blog.feed.rss).toBe('/blog/rss.xml')
+    expect(config.sections.blog?.features.list.previewImages).toBe(true)
+    expect(config.sections.blog?.features.syndication && config.sections.blog.features.syndication.rss).toBe('/blog/rss.xml')
     expect(config.sections.news?.routes.category).toBe('/news/category/:category')
-    expect(config.sections.news?.feed).toBe(false)
+    expect(config.sections.news?.features.syndication).toBe(false)
   })
 
   it('allows sections to hide list preview images', () => {
     const config = normalizeBlogConfig({
       sections: {
-        blog: { collection: 'article', showPreviewImages: false },
+        blog: { collection: 'article', features: { list: { previewImages: false } } },
       },
     })
 
-    expect(config.sections.blog?.showPreviewImages).toBe(false)
+    expect(config.sections.blog?.features.list.previewImages).toBe(false)
+  })
+
+  it('keeps legacy flat feature options compatible', () => {
+    const config = normalizeBlogConfig({
+      sections: {
+        blog: {
+          collection: 'article',
+          authors: { collection: 'user' },
+          categories: { News: { label: 'News' } },
+          feed: false,
+          showPreviewImages: false,
+        },
+      },
+    })
+
+    expect(config.sections.blog?.features).toMatchObject({
+      authors: { collection: 'user' },
+      list: { previewImages: false },
+      syndication: false,
+      taxonomy: { categories: { News: { label: 'News' } } },
+    })
   })
 
   it('rejects route collisions', () => {

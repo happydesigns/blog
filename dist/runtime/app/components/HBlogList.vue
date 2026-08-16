@@ -21,7 +21,8 @@ const { page, selectedCategory, updateQuery } = useBlogListState({
 });
 const effectiveCategory = computed(() => selectedCategory.value === allLabel.value ? void 0 : selectedCategory.value);
 const itemsPerPage = computed(() => props.itemsPerPage ?? section.value.itemsPerPage);
-const showPreviewImages = computed(() => props.showPreviewImages ?? section.value.showPreviewImages);
+const showPreviewImages = computed(() => props.showPreviewImages ?? section.value.features.list.previewImages);
+const taxonomyCategories = computed(() => section.value.features.taxonomy ? section.value.features.taxonomy.categories : {});
 const { data, status } = await useBlogPosts({
   section: () => props.section,
   page,
@@ -32,7 +33,7 @@ const { data, status } = await useBlogPosts({
 });
 const categories = computed(() => [
   { label: allLabel.value, value: allLabel.value },
-  ...Object.entries(section.value.categories).map(([value, options]) => ({
+  ...Object.entries(taxonomyCategories.value).map(([value, options]) => ({
     label: options.label ?? value,
     value
   }))
@@ -54,7 +55,7 @@ watch(page, () => {
 <template>
   <div class="flex flex-col gap-8">
     <UNavigationMenu
-      v-if="showCategories && !category && Object.keys(section.categories).length > 0"
+      v-if="showCategories && !category && Object.keys(taxonomyCategories).length > 0"
       :items="categories"
       class="border-b border-default"
       highlight

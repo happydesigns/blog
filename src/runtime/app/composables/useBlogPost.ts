@@ -28,9 +28,13 @@ export function useBlogPost(options: UseBlogPostOptions = {}) {
       return null
     if (!preview.value && !isBlogPostVisible(post))
       return null
-    const authors = await resolveBlogAuthors([post], section.value.authors && section.value.authors.collection)
-    const categoryKey = getBlogPostCategories(post)[0]
-    const categoryOptions = categoryKey ? section.value.categories[categoryKey] : undefined
+    const authors = await resolveBlogAuthors([post], section.value.features.authors && section.value.features.authors.collection)
+    const categoryKey = section.value.features.taxonomy
+      ? getBlogPostCategories(post)[0]
+      : undefined
+    const categoryOptions = categoryKey && section.value.features.taxonomy
+      ? section.value.features.taxonomy.categories[categoryKey]
+      : undefined
     const resolved: ResolvedBlogPost = {
       ...post,
       resolvedBadge: categoryKey

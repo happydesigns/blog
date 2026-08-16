@@ -84,11 +84,15 @@ export function useBlogPosts(options: UseBlogPostsOptions = {}) {
 
     const start = (page.value - 1) * itemsPerPage.value
     const paginated = visiblePosts.slice(start, start + itemsPerPage.value)
-    const authors = await resolveBlogAuthors(paginated, currentSection.authors && currentSection.authors.collection)
+    const authors = await resolveBlogAuthors(paginated, currentSection.features.authors && currentSection.features.authors.collection)
 
     const posts: ResolvedBlogPost[] = paginated.map((post) => {
-      const categoryKey = getBlogPostCategories(post)[0]
-      const categoryOptions = categoryKey ? currentSection.categories[categoryKey] : undefined
+      const categoryKey = currentSection.features.taxonomy
+        ? getBlogPostCategories(post)[0]
+        : undefined
+      const categoryOptions = categoryKey && currentSection.features.taxonomy
+        ? currentSection.features.taxonomy.categories[categoryKey]
+        : undefined
       return {
         ...post,
         resolvedBadge: categoryKey

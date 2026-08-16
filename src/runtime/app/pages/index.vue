@@ -11,10 +11,10 @@ useSeoMeta({
   description: () => section.value.description,
 })
 useHead({
-  link: () => section.value.feed
+  link: () => section.value.features.syndication
     ? [
-        ...(section.value.feed.rss ? [{ rel: 'alternate' as const, type: 'application/rss+xml', href: section.value.feed.rss, title: `${section.value.title} RSS` }] : []),
-        ...(section.value.feed.atom ? [{ rel: 'alternate' as const, type: 'application/atom+xml', href: section.value.feed.atom, title: `${section.value.title} Atom` }] : []),
+        ...(section.value.features.syndication.rss ? [{ rel: 'alternate' as const, type: 'application/rss+xml', href: section.value.features.syndication.rss, title: `${section.value.title} RSS` }] : []),
+        ...(section.value.features.syndication.atom ? [{ rel: 'alternate' as const, type: 'application/atom+xml', href: section.value.features.syndication.atom, title: `${section.value.title} Atom` }] : []),
       ]
     : [],
 })
