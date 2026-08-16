@@ -7,10 +7,14 @@ export default defineBlogConfig({
       basePath: '/blog',
       title: 'Blog',
       description: 'Long-form notes from the happydesigns Blog playground.',
-      authors: { collection: 'author' },
-      categories: {
-        Architecture: { label: 'Architecture', color: 'primary' },
-        Workflow: { label: 'Workflow', color: 'info' },
+      features: {
+        authors: { collection: 'author' },
+        taxonomy: {
+          categories: {
+            Architecture: { label: 'Architecture', color: 'primary' },
+            Workflow: { label: 'Workflow', color: 'info' },
+          },
+        },
       },
       itemsPerPage: 6,
     },
@@ -19,8 +23,10 @@ export default defineBlogConfig({
       basePath: '/news',
       title: 'News',
       description: 'A second independent publication section.',
-      feed: {
-        atom: false,
+      features: {
+        syndication: {
+          atom: false,
+        },
       },
     },
   },

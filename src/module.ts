@@ -94,9 +94,9 @@ export default defineNuxtModule<BlogModuleOptions>({
     })
 
     for (const section of Object.values(config.sections)) {
-      if (!section.feed)
+      if (!section.features.syndication)
         continue
-      for (const route of [section.feed.rss, section.feed.atom]) {
+      for (const route of [section.features.syndication.rss, section.features.syndication.atom]) {
         if (route) {
           addServerHandler({
             route,

@@ -31,6 +31,18 @@ interface BlogFeedOptions {
 interface BlogAuthorOptions {
     collection: string;
 }
+interface BlogListFeatureOptions {
+    previewImages?: boolean;
+}
+interface BlogTaxonomyFeatureOptions {
+    categories?: Record<string, BlogCategoryOptions>;
+}
+interface BlogSectionFeatures {
+    list?: BlogListFeatureOptions;
+    authors?: BlogAuthorOptions | false;
+    taxonomy?: BlogTaxonomyFeatureOptions | false;
+    syndication?: BlogFeedOptions | false;
+}
 interface BlogSectionOptions {
     collection: string;
     basePath?: string;
@@ -38,15 +50,20 @@ interface BlogSectionOptions {
     description?: string;
     locale?: string;
     itemsPerPage?: number;
+    features?: BlogSectionFeatures;
+    /** @deprecated Use `features.list.previewImages`. */
     showPreviewImages?: boolean;
     sort?: {
         field?: string;
         direction?: BlogSortDirection;
     };
+    /** @deprecated Use `features.taxonomy.categories`. */
     categories?: Record<string, BlogCategoryOptions>;
     labels?: Partial<BlogLabels>;
+    /** @deprecated Use `features.authors`. */
     authors?: BlogAuthorOptions | false;
     routes?: Partial<BlogSectionRoutes> | false;
+    /** @deprecated Use `features.syndication`. */
     feed?: BlogFeedOptions | false;
 }
 interface BlogModuleOptions {
@@ -60,16 +77,18 @@ interface NormalizedBlogSection {
     description?: string;
     locale: string;
     itemsPerPage: number;
-    showPreviewImages: boolean;
     sort: {
         field: string;
         direction: BlogSortDirection;
     };
-    categories: Record<string, BlogCategoryOptions>;
     labels: BlogLabels;
-    authors: BlogAuthorOptions | false;
+    features: {
+        list: Required<BlogListFeatureOptions>;
+        authors: BlogAuthorOptions | false;
+        taxonomy: Required<BlogTaxonomyFeatureOptions> | false;
+        syndication: Required<Pick<BlogFeedOptions, 'rss' | 'atom'>> & Omit<BlogFeedOptions, 'rss' | 'atom'> | false;
+    };
     routes: BlogSectionRoutes;
-    feed: Required<Pick<BlogFeedOptions, 'rss' | 'atom'>> & Omit<BlogFeedOptions, 'rss' | 'atom'> | false;
 }
 interface NormalizedBlogConfig {
     sections: Record<string, NormalizedBlogSection>;
@@ -104,4 +123,4 @@ declare function getBlogPostCategories(post: BlogPublication): string[];
 declare function joinBlogUrl(base: string, path: string): string;
 
 export { defineBlogConfig, getBlogPostCategories, isBlogPostVisible, joinBlogUrl, normalizeBasePath, normalizeBlogConfig };
-export type { BlogAuthorOptions, BlogCategoryOptions, BlogFeedOptions, BlogLabels, BlogModuleOptions, BlogPublication, BlogPublicationStatus, BlogSectionOptions, BlogSectionRoutes, BlogSortDirection, NormalizedBlogConfig, NormalizedBlogSection };
+export type { BlogAuthorOptions, BlogCategoryOptions, BlogFeedOptions, BlogLabels, BlogListFeatureOptions, BlogModuleOptions, BlogPublication, BlogPublicationStatus, BlogSectionFeatures, BlogSectionOptions, BlogSectionRoutes, BlogSortDirection, BlogTaxonomyFeatureOptions, NormalizedBlogConfig, NormalizedBlogSection };

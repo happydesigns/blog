@@ -36,6 +36,12 @@ Consumer schemas extend the base contract through `defineBlogCollection` or
 `defineBlogCollections`. Unknown consumer fields remain on queried documents
 and are exposed to component slots.
 
+Capability options are grouped by outcome under `features` so the default path
+stays easy to configure. This feature object is not a second page-variant graph:
+Nuxt Variants remains authoritative for composing shared layout behavior and
+its schema. Consumers can pass a resolved variant schema as `baseSchema`; Blog
+then layers only publication behavior and project extensions onto it.
+
 The module can be removed by removing its dependency and module registration.
 Content remains normal Nuxt Content data. Applications that use module-owned
 routes must replace those routes before uninstalling; applications with custom

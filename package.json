@@ -60,9 +60,10 @@
   ],
   "scripts": {
     "build": "nuxt-module-build build",
+    "clean:dist": "node scripts/clean-dist.mjs",
     "dev": "pnpm dev:prepare && nuxt dev playground",
     "dev:build": "nuxt build playground",
-    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
+    "dev:prepare": "pnpm clean:dist && nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
     "release": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "typecheck": "pnpm dev:prepare && vue-tsc --noEmit && cd playground && vue-tsc --noEmit",

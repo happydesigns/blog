@@ -37,6 +37,21 @@ export interface BlogAuthorOptions {
   collection: string
 }
 
+export interface BlogListFeatureOptions {
+  previewImages?: boolean
+}
+
+export interface BlogTaxonomyFeatureOptions {
+  categories?: Record<string, BlogCategoryOptions>
+}
+
+export interface BlogSectionFeatures {
+  list?: BlogListFeatureOptions
+  authors?: BlogAuthorOptions | false
+  taxonomy?: BlogTaxonomyFeatureOptions | false
+  syndication?: BlogFeedOptions | false
+}
+
 export interface BlogSectionOptions {
   collection: string
   basePath?: string
@@ -44,15 +59,20 @@ export interface BlogSectionOptions {
   description?: string
   locale?: string
   itemsPerPage?: number
+  features?: BlogSectionFeatures
+  /** @deprecated Use `features.list.previewImages`. */
   showPreviewImages?: boolean
   sort?: {
     field?: string
     direction?: BlogSortDirection
   }
+  /** @deprecated Use `features.taxonomy.categories`. */
   categories?: Record<string, BlogCategoryOptions>
   labels?: Partial<BlogLabels>
+  /** @deprecated Use `features.authors`. */
   authors?: BlogAuthorOptions | false
   routes?: Partial<BlogSectionRoutes> | false
+  /** @deprecated Use `features.syndication`. */
   feed?: BlogFeedOptions | false
 }
 
@@ -68,16 +88,18 @@ export interface NormalizedBlogSection {
   description?: string
   locale: string
   itemsPerPage: number
-  showPreviewImages: boolean
   sort: {
     field: string
     direction: BlogSortDirection
   }
-  categories: Record<string, BlogCategoryOptions>
   labels: BlogLabels
-  authors: BlogAuthorOptions | false
+  features: {
+    list: Required<BlogListFeatureOptions>
+    authors: BlogAuthorOptions | false
+    taxonomy: Required<BlogTaxonomyFeatureOptions> | false
+    syndication: Required<Pick<BlogFeedOptions, 'rss' | 'atom'>> & Omit<BlogFeedOptions, 'rss' | 'atom'> | false
+  }
   routes: BlogSectionRoutes
-  feed: Required<Pick<BlogFeedOptions, 'rss' | 'atom'>> & Omit<BlogFeedOptions, 'rss' | 'atom'> | false
 }
 
 export interface NormalizedBlogConfig {
@@ -161,15 +183,31 @@ export function normalizeBlogConfig(options: BlogModuleOptions = {}): Normalized
       author: routesDisabled ? false : normalizeRoute(routeInput?.author, `${basePath}/author/:author`),
     }
 
-    const feed = input.feed === false
+    const syndicationInput = input.features?.syndication !== undefined
+      ? input.features.syndication
+      : input.feed
+    const syndication = syndicationInput === false
       ? false
       : {
-          ...input.feed,
-          rss: normalizeRoute(input.feed?.rss, `${basePath}/rss.xml`),
-          atom: normalizeRoute(input.feed?.atom, `${basePath}/atom.xml`),
+          ...syndicationInput,
+          rss: normalizeRoute(syndicationInput?.rss, `${basePath}/rss.xml`),
+          atom: normalizeRoute(syndicationInput?.atom, `${basePath}/atom.xml`),
         }
 
-    for (const [routeKind, route] of Object.entries({ ...routes, rss: feed && feed.rss, atom: feed && feed.atom })) {
+    const authors = input.features?.authors !== undefined
+      ? input.features.authors
+      : input.authors ?? false
+    const taxonomyInput = input.features?.taxonomy !== undefined
+      ? input.features.taxonomy
+      : { categories: input.categories }
+    const taxonomy = taxonomyInput === false
+      ? false
+      : { categories: taxonomyInput.categories ?? {} }
+    const previewImages = input.features?.list?.previewImages
+      ?? input.showPreviewImages
+      ?? true
+
+    for (const [routeKind, route] of Object.entries({ ...routes, rss: syndication && syndication.rss, atom: syndication && syndication.atom })) {
       if (!route)
         continue
       const owner = registeredRoutes.get(route)
@@ -186,16 +224,18 @@ export function normalizeBlogConfig(options: BlogModuleOptions = {}): Normalized
       description: input.description,
       locale: input.locale ?? 'en',
       itemsPerPage: input.itemsPerPage ?? 12,
-      showPreviewImages: input.showPreviewImages ?? true,
       sort: {
         field: input.sort?.field ?? 'date',
         direction: input.sort?.direction ?? 'DESC',
       },
-      categories: input.categories ?? {},
       labels: { ...defaultLabels, ...input.labels },
-      authors: input.authors ?? false,
+      features: {
+        list: { previewImages },
+        authors,
+        taxonomy,
+        syndication,
+      },
       routes,
-      feed,
     }
   }
 

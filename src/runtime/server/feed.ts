@@ -35,20 +35,20 @@ function publicationDate(post: FeedPost): Date {
 function findSection(event: H3Event, path: string): { section: NormalizedBlogSection, format: 'rss' | 'atom' } {
   const config = useRuntimeConfig(event).public.happydesignsBlog as unknown as NormalizedBlogConfig
   for (const section of Object.values(config.sections)) {
-    if (!section.feed)
+    if (!section.features.syndication)
       continue
-    if (section.feed.rss === path)
+    if (section.features.syndication.rss === path)
       return { section, format: 'rss' }
-    if (section.feed.atom === path)
+    if (section.features.syndication.atom === path)
       return { section, format: 'atom' }
   }
   throw createError({ statusCode: 404, statusMessage: 'Feed not found' })
 }
 
 function renderRss(section: NormalizedBlogSection, posts: FeedPost[], siteUrl: string): string {
-  if (!section.feed)
+  if (!section.features.syndication)
     throw new Error(`[happydesigns/blog] Section "${section.key}" has no feed configuration.`)
-  const feed = section.feed
+  const feed = section.features.syndication
   const feedUrl = joinBlogUrl(siteUrl, feed.rss || section.basePath)
   const feedTitle = feed.title || section.title
   const feedDescription = feed.description || section.description || section.title
@@ -79,9 +79,9 @@ function renderRss(section: NormalizedBlogSection, posts: FeedPost[], siteUrl: s
 }
 
 function renderAtom(section: NormalizedBlogSection, posts: FeedPost[], siteUrl: string): string {
-  if (!section.feed)
+  if (!section.features.syndication)
     throw new Error(`[happydesigns/blog] Section "${section.key}" has no feed configuration.`)
-  const feed = section.feed
+  const feed = section.features.syndication
   const feedUrl = joinBlogUrl(siteUrl, feed.atom || section.basePath)
   const feedTitle = feed.title || section.title
   const updated = posts[0] ? publicationDate(posts[0]).toISOString() : new Date().toISOString()
@@ -109,8 +109,8 @@ function renderAtom(section: NormalizedBlogSection, posts: FeedPost[], siteUrl: 
 export default defineEventHandler(async (event) => {
   const requestUrl = getRequestURL(event)
   const { section, format } = findSection(event, requestUrl.pathname)
-  const siteUrl = section.feed && section.feed.siteUrl
-    ? section.feed.siteUrl
+  const siteUrl = section.features.syndication && section.features.syndication.siteUrl
+    ? section.features.syndication.siteUrl
     : requestUrl.origin
   const query = (queryCollection as QueryCollectionWithEvent)(event, section.collection as keyof Collections) as unknown as CollectionQueryBuilder<FeedPost>
   const posts = (await query

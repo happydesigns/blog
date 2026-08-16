@@ -2,16 +2,18 @@ import { property, defineCollection } from '@nuxt/content';
 import { z } from 'zod';
 import { normalizeBlogConfig } from './core.mjs';
 
-const blogPostSchema = z.object({
+const blogPublicationSchema = z.object({
   date: z.date().optional(),
   publishedAt: z.date().optional(),
   updatedAt: z.date().optional(),
   published: z.boolean().default(true),
   status: z.enum(["draft", "scheduled", "published"]).optional(),
+  categories: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional()
+});
+const blogPostSchema = blogPublicationSchema.extend({
   authors: z.array(z.string()).optional(),
   category: z.string().optional(),
-  categories: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
   image: z.object({
     src: property(z.string()).editor({ input: "media" }),
     alt: z.string().optional(),
@@ -27,11 +29,15 @@ const blogCollectionIndexes = [
   { columns: ["published", "category", "date"] },
   { columns: ["status", "publishedAt"] }
 ];
+function createBlogCollectionSchema(options = {}) {
+  const baseSchema = options.baseSchema ? options.baseSchema.extend(blogPublicationSchema.shape) : blogPostSchema;
+  return baseSchema.extend(options.schema ?? {});
+}
 function defineBlogCollection(options) {
   return defineCollection({
     type: "page",
     source: options.source,
-    schema: blogPostSchema.extend(options.schema ?? {}),
+    schema: createBlogCollectionSchema(options),
     indexes: options.indexes ?? blogCollectionIndexes
   });
 }
@@ -50,4 +56,4 @@ function defineBlogCollections(config, definitions) {
   return collections;
 }
 
-export { blogCollectionIndexes, blogPostSchema, defineBlogCollection, defineBlogCollections };
+export { blogCollectionIndexes, blogPostSchema, blogPublicationSchema, createBlogCollectionSchema, defineBlogCollection, defineBlogCollections };

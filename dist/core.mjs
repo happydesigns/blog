@@ -41,12 +41,17 @@ function normalizeBlogConfig(options = {}) {
       tag: routesDisabled ? false : normalizeRoute(routeInput?.tag, `${basePath}/tag/:tag`),
       author: routesDisabled ? false : normalizeRoute(routeInput?.author, `${basePath}/author/:author`)
     };
-    const feed = input.feed === false ? false : {
-      ...input.feed,
-      rss: normalizeRoute(input.feed?.rss, `${basePath}/rss.xml`),
-      atom: normalizeRoute(input.feed?.atom, `${basePath}/atom.xml`)
+    const syndicationInput = input.features?.syndication !== void 0 ? input.features.syndication : input.feed;
+    const syndication = syndicationInput === false ? false : {
+      ...syndicationInput,
+      rss: normalizeRoute(syndicationInput?.rss, `${basePath}/rss.xml`),
+      atom: normalizeRoute(syndicationInput?.atom, `${basePath}/atom.xml`)
     };
-    for (const [routeKind, route] of Object.entries({ ...routes, rss: feed && feed.rss, atom: feed && feed.atom })) {
+    const authors = input.features?.authors !== void 0 ? input.features.authors : input.authors ?? false;
+    const taxonomyInput = input.features?.taxonomy !== void 0 ? input.features.taxonomy : { categories: input.categories };
+    const taxonomy = taxonomyInput === false ? false : { categories: taxonomyInput.categories ?? {} };
+    const previewImages = input.features?.list?.previewImages ?? input.showPreviewImages ?? true;
+    for (const [routeKind, route] of Object.entries({ ...routes, rss: syndication && syndication.rss, atom: syndication && syndication.atom })) {
       if (!route)
         continue;
       const owner = registeredRoutes.get(route);
@@ -62,16 +67,18 @@ function normalizeBlogConfig(options = {}) {
       description: input.description,
       locale: input.locale ?? "en",
       itemsPerPage: input.itemsPerPage ?? 12,
-      showPreviewImages: input.showPreviewImages ?? true,
       sort: {
         field: input.sort?.field ?? "date",
         direction: input.sort?.direction ?? "DESC"
       },
-      categories: input.categories ?? {},
       labels: { ...defaultLabels, ...input.labels },
-      authors: input.authors ?? false,
-      routes,
-      feed
+      features: {
+        list: { previewImages },
+        authors,
+        taxonomy,
+        syndication
+      },
+      routes
     };
   }
   return { sections };
