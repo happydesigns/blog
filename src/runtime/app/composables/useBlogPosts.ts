@@ -1,4 +1,4 @@
-import type { CollectionItemBase, CollectionQueryBuilder, Collections } from '@nuxt/content'
+import type { CollectionItemBase, CollectionQueryBuilder, Collections, PageCollectionItemBase } from '@nuxt/content'
 import type { BadgeProps, UserProps } from '@nuxt/ui'
 import type { MaybeRefOrGetter } from 'vue'
 import type { BlogPublication } from '../../../core'
@@ -7,9 +7,8 @@ import { queryCollection, useAsyncData } from '#imports'
 import { getBlogPostCategories, isBlogPostVisible, paginateBlogItems } from '../../../core'
 import { useBlogSection } from './useBlogSection'
 
-export interface BlogPostDocument extends CollectionItemBase, BlogPublication {
-  path: string
-  title: string
+export type BlogPostDocument = PageCollectionItemBase & BlogPublication & {
+  toc?: boolean
 }
 
 export interface ResolvedBlogPost extends BlogPostDocument {

@@ -1,11 +1,10 @@
-import type { CollectionItemBase } from '@nuxt/content';
+import type { PageCollectionItemBase } from '@nuxt/content';
 import type { BadgeProps, UserProps } from '@nuxt/ui';
 import type { MaybeRefOrGetter } from 'vue';
 import type { BlogPublication } from '../../../core.js';
-export interface BlogPostDocument extends CollectionItemBase, BlogPublication {
-    path: string;
-    title: string;
-}
+export type BlogPostDocument = PageCollectionItemBase & BlogPublication & {
+    toc?: boolean;
+};
 export interface ResolvedBlogPost extends BlogPostDocument {
     resolvedAuthors: UserProps[];
     resolvedBadge?: BadgeProps;

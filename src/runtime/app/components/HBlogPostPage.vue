@@ -28,6 +28,8 @@ if (!post.value) {
 const categories = computed(() => post.value && section.value.features.taxonomy
   ? getBlogPostCategories(post.value)
   : [])
+const toc = computed(() => post.value?.body?.toc)
+const showToc = computed(() => post.value?.toc !== false && Boolean(toc.value?.links?.length))
 const canonical = computed(() => {
   const siteUrl = section.value.features.syndication && section.value.features.syndication.siteUrl
   return siteUrl && post.value?.path ? joinBlogUrl(siteUrl, post.value.path) : undefined
@@ -132,6 +134,13 @@ useHead({
           </UBadge>
         </div>
       </UPageBody>
+
+      <template v-if="showToc" #right>
+        <UContentToc
+          :links="toc?.links"
+          :title="toc?.title"
+        />
+      </template>
     </UPage>
   </UContainer>
 </template>

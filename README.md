@@ -12,6 +12,14 @@ and multiple configured sections need install-time behavior. Applications keep
 their content sources and project-specific schema fields explicit in
 `content.config.ts`.
 
+Article bodies remain normal Nuxt Content documents. Headings, tables, code,
+links, callouts, and other Nuxt UI prose components work without a Blog-specific
+format, and the default post page renders a table of contents when the document
+contains headings and `toc` is not `false`. Applications can register their own
+MDC components for project-owned needs such as galleries, result tables, embeds,
+or downloads; Blog passes the document to `ContentRenderer` without constraining
+those extensions.
+
 ## Installation
 
 ```bash
