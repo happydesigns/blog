@@ -42,7 +42,7 @@ const features = [
 <template>
   <div>
     <UPageHero
-      headline="happydesigns/blog"
+      headline="Composable publishing"
       title="A configurable blog for Nuxt Content."
       description="Add publication routes, filters, authors and feeds while your application keeps control of its content model and visual language."
       :links="heroLinks"
