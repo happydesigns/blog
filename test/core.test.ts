@@ -33,9 +33,20 @@ describe('section configuration', () => {
     }))
 
     expect(config.sections.blog?.routes.post).toBe('/blog/[...slug]')
+    expect(config.sections.blog?.showPreviewImages).toBe(true)
     expect(config.sections.blog?.feed && config.sections.blog.feed.rss).toBe('/blog/rss.xml')
     expect(config.sections.news?.routes.category).toBe('/news/category/:category')
     expect(config.sections.news?.feed).toBe(false)
+  })
+
+  it('allows sections to hide list preview images', () => {
+    const config = normalizeBlogConfig({
+      sections: {
+        blog: { collection: 'article', showPreviewImages: false },
+      },
+    })
+
+    expect(config.sections.blog?.showPreviewImages).toBe(false)
   })
 
   it('rejects route collisions', () => {

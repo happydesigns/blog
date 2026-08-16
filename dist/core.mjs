@@ -62,6 +62,7 @@ function normalizeBlogConfig(options = {}) {
       description: input.description,
       locale: input.locale ?? "en",
       itemsPerPage: input.itemsPerPage ?? 12,
+      showPreviewImages: input.showPreviewImages ?? true,
       sort: {
         field: input.sort?.field ?? "date",
         direction: input.sort?.direction ?? "DESC"

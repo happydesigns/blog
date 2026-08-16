@@ -10,7 +10,8 @@ const props = defineProps({
   author: { type: String, required: false },
   orientation: { type: String, required: false, default: "horizontal" },
   itemsPerPage: { type: Number, required: false },
-  showCategories: { type: Boolean, required: false, default: true }
+  showCategories: { type: Boolean, required: false, default: true },
+  showPreviewImages: { type: Boolean, required: false }
 });
 const { section } = useBlogSection(() => props.section);
 const allLabel = computed(() => section.value.labels.all);
@@ -20,6 +21,7 @@ const { page, selectedCategory, updateQuery } = useBlogListState({
 });
 const effectiveCategory = computed(() => selectedCategory.value === allLabel.value ? void 0 : selectedCategory.value);
 const itemsPerPage = computed(() => props.itemsPerPage ?? section.value.itemsPerPage);
+const showPreviewImages = computed(() => props.showPreviewImages ?? section.value.showPreviewImages);
 const { data, status } = await useBlogPosts({
   section: () => props.section,
   page,
@@ -87,7 +89,7 @@ watch(page, () => {
           :to="post.path"
           :title="post.title"
           :description="post.description"
-          :image="post.image"
+          :image="showPreviewImages ? post.image : void 0"
           :badge="post.resolvedBadge"
           :authors="post.resolvedAuthors"
           variant="subtle"

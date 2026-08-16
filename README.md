@@ -30,6 +30,7 @@ export default defineBlogConfig({
       collection: 'article',
       basePath: '/blog',
       title: 'Blog',
+      showPreviewImages: true,
     },
     news: {
       collection: 'news',

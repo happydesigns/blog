@@ -44,6 +44,7 @@ export interface BlogSectionOptions {
   description?: string
   locale?: string
   itemsPerPage?: number
+  showPreviewImages?: boolean
   sort?: {
     field?: string
     direction?: BlogSortDirection
@@ -67,6 +68,7 @@ export interface NormalizedBlogSection {
   description?: string
   locale: string
   itemsPerPage: number
+  showPreviewImages: boolean
   sort: {
     field: string
     direction: BlogSortDirection
@@ -184,6 +186,7 @@ export function normalizeBlogConfig(options: BlogModuleOptions = {}): Normalized
       description: input.description,
       locale: input.locale ?? 'en',
       itemsPerPage: input.itemsPerPage ?? 12,
+      showPreviewImages: input.showPreviewImages ?? true,
       sort: {
         field: input.sort?.field ?? 'date',
         direction: input.sort?.direction ?? 'DESC',

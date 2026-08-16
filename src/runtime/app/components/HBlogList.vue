@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<{
   orientation?: 'horizontal' | 'vertical'
   itemsPerPage?: number
   showCategories?: boolean
+  showPreviewImages?: boolean
 }>(), {
   orientation: 'horizontal',
   showCategories: true,
@@ -25,6 +26,7 @@ const { page, selectedCategory, updateQuery } = useBlogListState({
 })
 const effectiveCategory = computed(() => selectedCategory.value === allLabel.value ? undefined : selectedCategory.value)
 const itemsPerPage = computed(() => props.itemsPerPage ?? section.value.itemsPerPage)
+const showPreviewImages = computed(() => props.showPreviewImages ?? section.value.showPreviewImages)
 
 const { data, status } = await useBlogPosts({
   section: () => props.section,
@@ -95,7 +97,7 @@ watch(page, () => {
           :to="post.path"
           :title="post.title"
           :description="post.description"
-          :image="post.image"
+          :image="showPreviewImages ? post.image : undefined"
           :badge="post.resolvedBadge"
           :authors="post.resolvedAuthors"
           variant="subtle"
