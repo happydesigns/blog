@@ -1,0 +1,12 @@
+{
+  "name": "@happydesigns/blog",
+  "configKey": "blog",
+  "compatibility": {
+    "nuxt": ">=4.5.1 <6"
+  },
+  "version": "0.1.0",
+  "builder": {
+    "@nuxt/module-builder": "1.0.3",
+    "unbuild": "3.6.1"
+  }
+}
