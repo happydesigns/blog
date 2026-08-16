@@ -57,7 +57,6 @@ watch(page, () => {
     <UNavigationMenu
       v-if="showCategories && !category && Object.keys(taxonomyCategories).length > 0"
       :items="categories"
-      class="border-b border-default"
       highlight
     />
 
