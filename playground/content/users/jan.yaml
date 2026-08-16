@@ -1,4 +1,8 @@
 username: jan
 name: Jan
-description: happydesigns
+description: Product and systems design
+to: /blog/author/jan
+avatar:
+  src: /images/avatar-jan.svg
+  alt: Jan
 

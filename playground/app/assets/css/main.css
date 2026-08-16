@@ -1,3 +1,19 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+:root {
+  --ui-container: 74rem;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 20rem;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--ui-primary) 30%, transparent);
+}
+
