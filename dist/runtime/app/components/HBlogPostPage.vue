@@ -1,13 +1,15 @@
 <script setup>
 import { computed } from "vue";
 import { createError, useHead, useSeoMeta } from "#imports";
-import { getBlogPostCategories, joinBlogUrl } from "../../../core";
+import { joinBlogUrl } from "../../../core";
 import { useBlogPost } from "../composables/useBlogPost";
 import { useBlogSection } from "../composables/useBlogSection";
+import { useBlogSurround } from "../composables/useBlogSurround";
 const props = defineProps({
   section: { type: String, required: false },
   path: { type: String, required: false },
-  preview: { type: Boolean, required: false }
+  preview: { type: Boolean, required: false },
+  showSurround: { type: Boolean, required: false, default: true }
 });
 const { section } = useBlogSection(() => props.section);
 const { data: post } = await useBlogPost({
@@ -15,15 +17,20 @@ const { data: post } = await useBlogPost({
   path: () => props.path,
   preview: () => props.preview
 });
+const { data: surround } = await useBlogSurround({
+  section: () => props.section,
+  path: () => props.path
+});
 if (!post.value) {
   throw createError({
     statusCode: 404,
     statusMessage: "Post not found"
   });
 }
-const categories = computed(() => post.value && section.value.features.taxonomy ? getBlogPostCategories(post.value) : []);
 const toc = computed(() => post.value?.body?.toc);
 const showToc = computed(() => post.value?.toc !== false && Boolean(toc.value?.links?.length));
+const showSurround = computed(() => props.showSurround && Boolean(surround.value?.some(Boolean)));
+const contentSurround = computed(() => surround.value);
 const canonical = computed(() => {
   const siteUrl = section.value.features.syndication && section.value.features.syndication.siteUrl;
   return siteUrl && post.value?.path ? joinBlogUrl(siteUrl, post.value.path) : void 0;
@@ -104,17 +111,10 @@ useHead({
         />
 
         <div
-          v-if="section.features.taxonomy && (categories.length > 0 || post.tags?.length)"
-          class="mt-12 flex flex-wrap gap-2"
+          v-if="post.tags?.length"
+          class="mt-12 flex flex-wrap items-center gap-2"
         >
-          <UBadge
-            v-for="category in categories"
-            :key="`category:${category}`"
-            color="neutral"
-            variant="subtle"
-          >
-            {{ section.features.taxonomy ? section.features.taxonomy.categories[category]?.label ?? category : category }}
-          </UBadge>
+          <span class="mr-1 text-sm font-medium text-muted">Tags</span>
           <UBadge
             v-for="tag in post.tags"
             :key="`tag:${tag}`"
@@ -124,9 +124,25 @@ useHead({
             {{ tag }}
           </UBadge>
         </div>
+
+        <slot
+          v-if="showSurround"
+          name="surround"
+          :post="post"
+          :section="section"
+          :surround="surround"
+        >
+          <UContentSurround
+            :surround="contentSurround"
+            class="mt-12"
+          />
+        </slot>
       </UPageBody>
 
-      <template v-if="showToc" #right>
+      <template
+        v-if="showToc"
+        #right
+      >
         <UContentToc
           :links="toc?.links"
           :title="toc?.title"

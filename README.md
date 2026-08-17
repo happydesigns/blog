@@ -20,6 +20,11 @@ MDC components for project-owned needs such as galleries, result tables, embeds,
 or downloads; Blog passes the document to `ContentRenderer` without constraining
 those extensions.
 
+The default post page also links to the adjacent visible posts with Nuxt UI's
+content surround component. Drafts and scheduled posts that are not public are
+excluded. Set `show-surround="false"` on `HBlogPostPage` or replace the
+`surround` slot when a custom page composition owns that navigation.
+
 ## Installation
 
 ```bash
