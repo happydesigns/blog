@@ -1,15 +1,14 @@
-import type { CollectionItemBase, CollectionQueryBuilder, Collections } from '@nuxt/content'
+import type { CollectionItemBase, CollectionQueryBuilder, Collections, PageCollectionItemBase } from '@nuxt/content'
 import type { BadgeProps, UserProps } from '@nuxt/ui'
 import type { MaybeRefOrGetter } from 'vue'
 import type { BlogPublication } from '../../../core'
 import { computed, toValue } from 'vue'
 import { queryCollection, useAsyncData } from '#imports'
-import { getBlogPostCategories, isBlogPostVisible } from '../../../core'
+import { getBlogPostCategories, isBlogPostVisible, paginateBlogItems } from '../../../core'
 import { useBlogSection } from './useBlogSection'
 
-export interface BlogPostDocument extends CollectionItemBase, BlogPublication {
-  path: string
-  title: string
+export type BlogPostDocument = PageCollectionItemBase & BlogPublication & {
+  toc?: boolean
 }
 
 export interface ResolvedBlogPost extends BlogPostDocument {
@@ -72,21 +71,42 @@ export function useBlogPosts(options: UseBlogPostsOptions = {}) {
 
   return useAsyncData(asyncKey, async () => {
     const currentSection = section.value
-    let query = queryCollection(currentSection.collection as keyof Collections) as unknown as CollectionQueryBuilder<BlogPostDocument>
-    query = query.where('published', '=', true)
-    query = query.order(currentSection.sort.field as keyof BlogPostDocument & string, currentSection.sort.direction)
+    const indexFields = [...new Set([
+      'path',
+      'published',
+      'status',
+      'publishedAt',
+      'category',
+      'categories',
+      'tags',
+      'authors',
+      currentSection.sort.field,
+    ])] as Array<keyof BlogPostDocument>
+    let indexQuery = queryCollection(currentSection.collection as keyof Collections) as unknown as CollectionQueryBuilder<BlogPostDocument>
+    indexQuery = indexQuery.where('published', '=', true)
+    indexQuery = indexQuery.order(currentSection.sort.field as keyof BlogPostDocument & string, currentSection.sort.direction)
 
-    const visiblePosts = (await query.all())
+    const visiblePosts = (await indexQuery.select(...indexFields).all() as BlogPostDocument[])
       .filter(post => isBlogPostVisible(post))
       .filter(post => !category.value || getBlogPostCategories(post).includes(category.value))
       .filter(post => !tag.value || post.tags?.includes(tag.value))
       .filter(post => !author.value || post.authors?.includes(author.value))
 
-    const start = (page.value - 1) * itemsPerPage.value
-    const paginated = visiblePosts.slice(start, start + itemsPerPage.value)
-    const authors = await resolveBlogAuthors(paginated, currentSection.features.authors && currentSection.features.authors.collection)
+    const pagination = paginateBlogItems(visiblePosts, page.value, itemsPerPage.value)
+    const selectedPaths = pagination.items.map(post => post.path)
+    const pageDocuments = selectedPaths.length > 0
+      ? await (queryCollection(currentSection.collection as keyof Collections) as unknown as CollectionQueryBuilder<BlogPostDocument>)
+          .where('path', 'IN', selectedPaths)
+          .all()
+      : []
+    const documentsByPath = new Map(pageDocuments.map(post => [post.path, post]))
+    const paginatedPosts = selectedPaths.flatMap((path) => {
+      const post = documentsByPath.get(path)
+      return post ? [post] : []
+    })
+    const authors = await resolveBlogAuthors(paginatedPosts, currentSection.features.authors && currentSection.features.authors.collection)
 
-    const posts: ResolvedBlogPost[] = paginated.map((post) => {
+    const posts: ResolvedBlogPost[] = paginatedPosts.map((post) => {
       const categoryKey = currentSection.features.taxonomy
         ? getBlogPostCategories(post)[0]
         : undefined
@@ -109,9 +129,14 @@ export function useBlogPosts(options: UseBlogPostsOptions = {}) {
       }
     })
 
-    return { posts, total: visiblePosts.length }
+    return {
+      posts,
+      page: pagination.page,
+      pageCount: pagination.pageCount,
+      total: pagination.total,
+    }
   }, {
     lazy: toValue(options.lazy) ?? false,
-    default: () => ({ posts: [] as ResolvedBlogPost[], total: 0 }),
+    default: () => ({ posts: [] as ResolvedBlogPost[], page: 1, pageCount: 0, total: 0 }),
   })
 }

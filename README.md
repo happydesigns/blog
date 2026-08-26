@@ -12,6 +12,19 @@ and multiple configured sections need install-time behavior. Applications keep
 their content sources and project-specific schema fields explicit in
 `content.config.ts`.
 
+Article bodies remain normal Nuxt Content documents. Headings, tables, code,
+links, callouts, and other Nuxt UI prose components work without a Blog-specific
+format, and the default post page renders a table of contents when the document
+contains headings and `toc` is not `false`. Applications can register their own
+MDC components for project-owned needs such as galleries, result tables, embeds,
+or downloads; Blog passes the document to `ContentRenderer` without constraining
+those extensions.
+
+The default post page also links to the adjacent visible posts with Nuxt UI's
+content surround component. Drafts and scheduled posts that are not public are
+excluded. Set `show-surround="false"` on `HBlogPostPage` or replace the
+`surround` slot when a custom page composition owns that navigation.
+
 ## Installation
 
 ```bash
@@ -154,6 +167,14 @@ defineBlogConfig({
 
 Module pages are optional. Custom pages can use the auto-imported
 `HBlogList`, `HBlogPostPage`, `useBlogPosts`, and `useBlogPost` APIs.
+
+### List pagination
+
+Set `itemsPerPage` on a section to define its default page size. `HBlogList`
+keeps the current page in the `page` query parameter, resets it when the
+category changes, and clamps stale or invalid pages to the available range.
+Individual lists can override `itemsPerPage` or hide the controls with
+`showPagination="false"`, which is useful for a short latest-posts preview.
 
 ## Publication rules
 

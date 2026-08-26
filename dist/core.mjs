@@ -105,8 +105,22 @@ function getBlogPostCategories(post) {
     ...post.categories ?? []
   ])];
 }
+function paginateBlogItems(items, requestedPage, requestedItemsPerPage) {
+  const itemsPerPage = Number.isFinite(requestedItemsPerPage) ? Math.max(1, Math.floor(requestedItemsPerPage)) : 1;
+  const total = items.length;
+  const pageCount = Math.ceil(total / itemsPerPage);
+  const normalizedPage = Number.isFinite(requestedPage) ? Math.max(1, Math.floor(requestedPage)) : 1;
+  const page = pageCount > 0 ? Math.min(normalizedPage, pageCount) : 1;
+  const start = (page - 1) * itemsPerPage;
+  return {
+    items: items.slice(start, start + itemsPerPage),
+    page,
+    pageCount,
+    total
+  };
+}
 function joinBlogUrl(base, path) {
   return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 }
 
-export { defineBlogConfig, getBlogPostCategories, isBlogPostVisible, joinBlogUrl, normalizeBasePath, normalizeBlogConfig };
+export { defineBlogConfig, getBlogPostCategories, isBlogPostVisible, joinBlogUrl, normalizeBasePath, normalizeBlogConfig, paginateBlogItems };

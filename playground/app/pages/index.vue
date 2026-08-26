@@ -69,6 +69,7 @@ const features = [
           section="blog"
           :items-per-page="3"
           :show-categories="false"
+          :show-pagination="false"
         />
       </template>
     </UPageSection>

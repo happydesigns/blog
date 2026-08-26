@@ -1,21 +1,30 @@
 <script setup lang="ts">
+import type { ContentSurroundLink } from '@nuxt/ui'
 import { computed } from 'vue'
 import { createError, useHead, useSeoMeta } from '#imports'
-import { getBlogPostCategories, joinBlogUrl } from '../../../core'
+import { joinBlogUrl } from '../../../core'
 import { useBlogPost } from '../composables/useBlogPost'
 import { useBlogSection } from '../composables/useBlogSection'
+import { useBlogSurround } from '../composables/useBlogSurround'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   section?: string
   path?: string
   preview?: boolean
-}>()
+  showSurround?: boolean
+}>(), {
+  showSurround: true,
+})
 
 const { section } = useBlogSection(() => props.section)
 const { data: post } = await useBlogPost({
   section: () => props.section,
   path: () => props.path,
   preview: () => props.preview,
+})
+const { data: surround } = await useBlogSurround({
+  section: () => props.section,
+  path: () => props.path,
 })
 
 if (!post.value) {
@@ -25,9 +34,11 @@ if (!post.value) {
   })
 }
 
-const categories = computed(() => post.value && section.value.features.taxonomy
-  ? getBlogPostCategories(post.value)
-  : [])
+const toc = computed(() => post.value?.body?.toc)
+const showToc = computed(() => post.value?.toc !== false && Boolean(toc.value?.links?.length))
+const showSurround = computed(() => props.showSurround && Boolean(surround.value?.some(Boolean)))
+// UContentSurround supports empty positions at runtime, but its public prop type does not express them.
+const contentSurround = computed(() => surround.value as ContentSurroundLink[] | undefined)
 const canonical = computed(() => {
   const siteUrl = section.value.features.syndication && section.value.features.syndication.siteUrl
   return siteUrl && post.value?.path ? joinBlogUrl(siteUrl, post.value.path) : undefined
@@ -111,17 +122,10 @@ useHead({
         />
 
         <div
-          v-if="section.features.taxonomy && (categories.length > 0 || post.tags?.length)"
-          class="mt-12 flex flex-wrap gap-2"
+          v-if="post.tags?.length"
+          class="mt-12 flex flex-wrap items-center gap-2"
         >
-          <UBadge
-            v-for="category in categories"
-            :key="`category:${category}`"
-            color="neutral"
-            variant="subtle"
-          >
-            {{ section.features.taxonomy ? section.features.taxonomy.categories[category]?.label ?? category : category }}
-          </UBadge>
+          <span class="mr-1 text-sm font-medium text-muted">Tags</span>
           <UBadge
             v-for="tag in post.tags"
             :key="`tag:${tag}`"
@@ -131,7 +135,30 @@ useHead({
             {{ tag }}
           </UBadge>
         </div>
+
+        <slot
+          v-if="showSurround"
+          name="surround"
+          :post="post"
+          :section="section"
+          :surround="surround"
+        >
+          <UContentSurround
+            :surround="contentSurround"
+            class="mt-12"
+          />
+        </slot>
       </UPageBody>
+
+      <template
+        v-if="showToc"
+        #right
+      >
+        <UContentToc
+          :links="toc?.links"
+          :title="toc?.title"
+        />
+      </template>
     </UPage>
   </UContainer>
 </template>

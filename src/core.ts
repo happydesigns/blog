@@ -129,6 +129,13 @@ export interface BlogPublication {
   [key: string]: unknown
 }
 
+export interface BlogPaginationResult<T> {
+  items: T[]
+  page: number
+  pageCount: number
+  total: number
+}
+
 const defaultLabels: BlogLabels = {
   all: 'All',
   empty: 'No posts found.',
@@ -268,6 +275,26 @@ export function getBlogPostCategories(post: BlogPublication): string[] {
     ...(post.category ? [post.category] : []),
     ...(post.categories ?? []),
   ])]
+}
+
+export function paginateBlogItems<T>(items: T[], requestedPage: number, requestedItemsPerPage: number): BlogPaginationResult<T> {
+  const itemsPerPage = Number.isFinite(requestedItemsPerPage)
+    ? Math.max(1, Math.floor(requestedItemsPerPage))
+    : 1
+  const total = items.length
+  const pageCount = Math.ceil(total / itemsPerPage)
+  const normalizedPage = Number.isFinite(requestedPage)
+    ? Math.max(1, Math.floor(requestedPage))
+    : 1
+  const page = pageCount > 0 ? Math.min(normalizedPage, pageCount) : 1
+  const start = (page - 1) * itemsPerPage
+
+  return {
+    items: items.slice(start, start + itemsPerPage),
+    page,
+    pageCount,
+    total,
+  }
 }
 
 export function joinBlogUrl(base: string, path: string): string {
